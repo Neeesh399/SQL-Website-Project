@@ -9,7 +9,7 @@ import './App.css'
 import Topbar from './components/Nav'
 
 function GridSquare(props){
-  //This is a test
+  //This is a test 2
   const [num, setNum] = useState(1)
   let board = []
   let currentGrid = props.currElements();
