@@ -7,16 +7,31 @@ import { useDrop } from 'react-dnd';
 
 import './App.css'
 import Topbar from './components/Nav'
+import { MyDraggables, RelationshipDraggable, TableDraggable, AttributeDraggable } from './components/Draggables';
+import { GridSquare } from './components/GridSquare';
 
+/*
 function GridSquare(props){
-  //This is a test 2
   const [num, setNum] = useState(1)
   let board = []
   let currentGrid = props.currElements();
   let key = String(props.x) + "." + String(props.y); 
   if (key in currentGrid){
     let copyOfItem = currentGrid[key]
-    board.push(<Draggables name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} reloadParent={() => updateSquare()}/>)
+    switch (copyOfItem.name){
+      case MyDraggables.TABLE:
+        board[0] = (<TableDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} reloadParent={() => updateSquare()}/>)
+        break
+      case MyDraggables.ATTRIBUTE:
+        board[0] = (<AttributeDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} reloadParent={() => updateSquare()}/>)
+        break
+      case MyDraggables.RELATIONSHIP:
+        board[0] = (<RelationshipDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} reloadParent={() => updateSquare()}/>)
+        break
+      default:
+        break
+    }
+    
   }
 
   function updateSquare(){
@@ -24,17 +39,22 @@ function GridSquare(props){
   }
 
   const [{isOver}, drop] = useDrop(() => ({
-    accept: "table",
+    accept: [MyDraggables.TABLE, MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
     drop: (item) => handleDrop(item),
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     })
   }))
-  
+
   const handleDrop = (item) => {
+    let tempKey = String(item.x) + "." + String(item.y)
+    let tempElements = props.currElements()
     let copyOfItem = JSON.parse(JSON.stringify(item));
     copyOfItem.x = props.x;
     copyOfItem.y = props.y;
+    if (tempElements[tempKey] !== undefined){
+      copyOfItem.name = tempElements[tempKey].name
+    }
     props.myFunc(copyOfItem, item.x, item.y)
   }
 
@@ -44,50 +64,7 @@ function GridSquare(props){
     </div>
   )
 }
-
-function Draggables(props){
-  let typeToSrc = {}
-  typeToSrc["table"] = "https://th.bing.com/th/id/R.34748973326465bb78ceea56f87e7bb3?rik=fb6HnWoY%2b9CcIg&pid=ImgRaw&r=0"
-  
-  const [{isDragging}, drag] = useDrag(() => ({
-    type: "table",
-    item: { 
-      name: props.name,
-      id: props.id, 
-      x: props.x,
-      y: props.y
-    },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-    end: (item, monitor) => {
-      if (props.x !== -1){
-        props.reloadParent()
-      }
-    }
-  }))
-
-  return (
-    /*<img
-      ref={drag}
-      src={typeToSrc[props.name]}
-      width="150px"
-      name={props.name}
-      id={props.id}
-      style={{ border: isDragging ? "5px solid pink" : "0px"}}
-    />*/
-    <div 
-      className='table' style={{ border: isDragging ? "5px solid pink" : "0px"}}
-      ref={drag}
-      width="150px"
-      name={props.name}
-      id={props.id}
-    >
-      "TEST"  
-    </div>
-    
-  )
-}
+*/
 
 class MyGrid extends React.Component{
   constructor(props){
@@ -128,7 +105,7 @@ class MyGrid extends React.Component{
 
 function OptionsLeft(props){
   const [{isOver}, drop] = useDrop(() => ({
-    accept: "table",
+    accept: [MyDraggables.TABLE, MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
     drop: (item) => handleDrop(item),
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
@@ -141,11 +118,9 @@ function OptionsLeft(props){
 
   return (
     <div id='optionsLeft' ref={drop}>
-      {
-        props.starterDraggables.map((obj) => (
-          <Draggables name={obj.name} id={obj.id} x={obj.x} y={obj.y}/>
-        ))
-      }
+      <TableDraggable name={MyDraggables.TABLE} id={0} x={-1} y={-1}/>
+      <AttributeDraggable name={MyDraggables.ATTRIBUTE} id={0} x={-1} y={-1}/>
+      <RelationshipDraggable name={MyDraggables.RELATIONSHIP} id={0} x={-1} y={-1}/>
     </div>
   )
 }
@@ -167,7 +142,13 @@ class BodySection extends React.Component{
       starterDraggables: [
         {
           name: "table", id: 0, x: -1, y: -1,
-        }
+        },
+        {
+          name: "attribute", id: 0, x: -1, y: -1,
+        },
+        {
+          name: "relationship", id: 0, x: -1, y: -1,
+        },
       ],
     };
   }
@@ -178,11 +159,20 @@ class BodySection extends React.Component{
     const currentGrid = Object.assign({}, current.currentGrid);
     let key = String(element.x) + "." + String(element.y);
     element.id = this.retrieveID()
+
     if (x !== -1){
       let oldKey = String(x) + "." + String(y);
       delete currentGrid[oldKey];
     }
-    currentGrid[key] = element
+    
+    if (element.name === "attribute" && currentGrid[key] != null && currentGrid[key].name === "table"){
+      let newKey = this.findXY(element.x,element.y)
+      currentGrid[newKey] = element
+    }
+    else{
+      currentGrid[key] = element
+    }
+
     this.setState({
       size: this.state.size,
       history2: history2.concat([
@@ -195,6 +185,10 @@ class BodySection extends React.Component{
       starterDraggables: this.state.starterDraggables
     });
     console.log(currentGrid)
+  }
+
+  findXY(x,y){
+    return String(x) + "." + String(y)
   }
 
   delFromGrid(x,y){

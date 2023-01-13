@@ -80,3 +80,24 @@ body{
     height: 50px;
     font-size: 12px;
 }
+.attribute{
+    border-color: green;
+    border-style: solid;
+    background-color: aqua;
+    width: 50px;
+    height: 50px;
+    font-size: 12px;
+}
+.relationship{
+    border-color: green;
+    border-style: solid;
+    background-color: rgb(221, 255, 0);
+    width: 50px;
+    height: 50px;
+    font-size: 12px;
+}
+.internalText{
+    border: none;
+    background-color: inherit;
+    width: inherit;
+}
