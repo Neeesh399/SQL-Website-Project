@@ -7,6 +7,7 @@ import { MyDraggables, RelationshipDraggable, TableDraggable, AttributeDraggable
 export function GridSquare(props){
     const [num, setNum] = useState(1)
     let board = []
+    
     let currentGrid = props.currElements();
     let key = String(props.x) + "." + String(props.y); 
     if (key in currentGrid){
@@ -24,7 +25,6 @@ export function GridSquare(props){
         default:
           break
       }
-      
     }
   
     function updateSquare(){
@@ -40,15 +40,21 @@ export function GridSquare(props){
     }))
   
     const handleDrop = (item) => {
-      let tempKey = String(item.x) + "." + String(item.y)
-      let tempElements = props.currElements()
-      let copyOfItem = JSON.parse(JSON.stringify(item));
-      copyOfItem.x = props.x;
-      copyOfItem.y = props.y;
-      if (tempElements[tempKey] !== undefined){
-        copyOfItem.name = tempElements[tempKey].name
+      if (item.name === "attribute" && item.id === 0){
+        //Do nothing
       }
-      props.myFunc(copyOfItem, item.x, item.y)
+      else{
+        let tempKey = String(item.x) + "." + String(item.y)
+        let tempElements = props.currElements()
+        let copyOfItem = JSON.parse(JSON.stringify(item));
+        copyOfItem.x = props.x;
+        copyOfItem.y = props.y;
+        if (tempElements[tempKey] !== undefined){
+          copyOfItem.name = tempElements[tempKey].name
+        }
+        item.id = 0
+        props.myFunc(copyOfItem, item.x, item.y)
+      }
     }
   
     return (

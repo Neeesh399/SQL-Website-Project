@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { useDrag } from 'react-dnd';
-
+import { useDrop } from 'react-dnd';
 
 export const MyDraggables = {
     TABLE: "table",
@@ -10,6 +10,25 @@ export const MyDraggables = {
 }
 
 export function TableDraggable(props){
+    const [{isOver, canDrop, getItem}, drop] = useDrop(() => ({
+        accept: [MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
+        drop: (item) => handleDrop(item),
+        collect: (monitor) => ({
+          isOver: !!monitor.isOver(),
+          canDrop: monitor.canDrop(),
+          getItem: monitor.getItem(),
+        })
+    }))
+
+    if (isOver && canDrop){
+      getItem.id = props.id;
+    }
+
+    const handleDrop = (item) => {
+        console.log("dropped!")
+        console.log(item)
+    }
+
     const [, drag] = useDrag(() => ({
       type: MyDraggables.TABLE,
       item: { 
@@ -24,11 +43,11 @@ export function TableDraggable(props){
         }
       }
     }))
-  
+
     return (
       <div 
         className={props.name} 
-        ref={drag}
+        ref={(el) => {drag(el); drop(el);}}
         width="150px"
         name={props.name}
         id={props.id}
