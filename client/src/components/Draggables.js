@@ -37,11 +37,11 @@ export function TableDraggable(props){
         x: props.x,
         y: props.y
       },
-      end: (item, monitor) => {
+      /*end: (item, monitor) => {
         if (props.x !== -1){
-          props.reloadParent()
+          //props.reloadParent()
         }
-      }
+      }*/
     }))
 
     return (

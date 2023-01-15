@@ -1,50 +1,14 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { useDrag } from 'react-dnd';
+//import { useDrag } from 'react-dnd';
 import { useDrop } from 'react-dnd';
 
 import './App.css'
 import Topbar from './components/Nav'
 import { MyDraggables, RelationshipDraggable, TableDraggable, AttributeDraggable } from './components/Draggables';
 import { GridSquare } from './components/GridSquare';
-
-/*
-function MyGrid(props){
-  let returnArr = []
-  //put this array in the parent, have getters/setters to update it
-
-  let maxWidth = 100/props.size;
-  let maxHeight = 90/props.size;
-  
-  let myStyling = {
-    width: maxWidth+"vw",
-    height: maxHeight+"vh"
-  }
-
-  for (let y=0; y<props.size; y++){
-    let row = []
-    for (let x=0; x<props.size; x++){
-      row.push(
-        <GridSquare 
-          x={x} 
-          y={y} 
-          style={myStyling} 
-          myFunc={(element,x,y) => props.myFunc(element,x,y)} 
-          currElements={() => props.currElements()}
-        />
-      )
-    }
-    props.appendToGridArr(row)
-    returnArr.push(<div className='row'>{row}</div>)
-  }
-    
-  return (
-    returnArr
-  )
-  
-}*/
 
 function OptionsLeft(props){
   const [{isOver}, drop] = useDrop(() => ({
@@ -72,41 +36,20 @@ class BodySection extends React.Component{
   constructor(props){
     super(props);
     const size = 5;
-    const gridArr = [];
-    this.modGrid2 = this.modGrid2.bind(this)
-
-    let maxWidth = 100/size;
-    let maxHeight = 90/size;
-    
-    let myStyling = {
-      width: maxWidth+"vw",
-      height: maxHeight+"vh"
-    }
-
-    for (let y=0; y<size; y++){
-      let row = []
-      for (let x=0; x<size; x++){
-        row.push(
-          <GridSquare 
-            x={x} 
-            y={y} 
-            style={myStyling} 
-            myFunc={this.modGrid2} 
-            currElements={() => this.retrieveGrid()}
-          />
-        )
+    //const gridArr = [];
+    const plswork = {};
+    const history2 = [
+      {
+        currentGrid: {}
       }
-      gridArr.push(row)
-    }
+    ]
+    this.modGrid2 = this.modGrid2.bind(this)
 
     this.state = {
       size: size,
-      gridArr: gridArr,
-      history2: [
-        {
-          currentGrid: {}
-        }
-      ],
+      //gridArr: gridArr,
+      plswork: plswork,
+      history2: history2,
       numSteps: 0,
       idNums: 0,
       starterDraggables: [
@@ -149,7 +92,8 @@ class BodySection extends React.Component{
     
     this.setState({
       size: this.state.size,
-      gridArr: this.state.gridArr,
+      //gridArr: this.state.gridArr,
+      plswork: currentGrid,
       history2: history2.concat([
         {
           currentGrid: currentGrid
@@ -175,7 +119,6 @@ class BodySection extends React.Component{
       for (const [key,value] of Object.entries(currentGrid)){
         let currObject = currentGrid[key]
         if (currObject.id === item.id){
-          this.reloadSquare(key[2], key[0])
           delete currentGrid[key]
         }
       }
@@ -183,7 +126,8 @@ class BodySection extends React.Component{
 
     this.setState({
       size: this.state.size,
-      gridArr: this.state.gridArr,
+      //gridArr: this.state.gridArr,
+      plswork: currentGrid,
       history2: history2.concat([
         {
           currentGrid: currentGrid
@@ -200,18 +144,40 @@ class BodySection extends React.Component{
     return (history2[history2.length-1]).currentGrid
   }
 
-  reloadSquare(y,x){
-    //console.log(this.state.gridArr[y][x])
-  }
+  render (){   
+    let gridArr = []
+    let maxWidth = 100/this.state.size;
+    let maxHeight = 90/this.state.size;
+    
+    let myStyling = {
+      width: maxWidth+"vw",
+      height: maxHeight+"vh"
+    }
 
-  render (){    
+    for (let y=0; y<this.state.size; y++){
+      let row = []
+      for (let x=0; x<this.state.size; x++){
+        row.push(
+          <GridSquare 
+            x={x} 
+            y={y} 
+            style={myStyling} 
+            myFunc={this.modGrid2} 
+            currElements={() => this.retrieveGrid()}
+            board={this.state.plswork}
+          />
+        )
+      }
+      gridArr.push(row)
+    }
+
     return (
       <div id='wrapper'>
         <OptionsLeft starterDraggables={this.state.starterDraggables} delFromGrid={(x,y) => this.delFromGrid(x,y)}/>
         <div id='gridRight'>
           {
-            this.state.gridArr.map((row) => (
-              <div className='row'>{row}</div>
+            gridArr.map((row, index) => (
+              <div className='row' key={index}>{row}</div>
             ))
           }
         </div>

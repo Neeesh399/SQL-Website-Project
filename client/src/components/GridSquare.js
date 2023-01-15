@@ -1,34 +1,29 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { useDrop } from 'react-dnd';
 
 import { MyDraggables, RelationshipDraggable, TableDraggable, AttributeDraggable } from './Draggables';
 
 export function GridSquare(props){
-    const [num, setNum] = useState(1)
-    let board = []
-
+    let board = null
+    
     let currentGrid = props.currElements();
     let key = String(props.x) + "." + String(props.y); 
     if (key in currentGrid){
-      let copyOfItem = currentGrid[key]
-      switch (copyOfItem.name){
+      let copyOfItem = props.board[key]
+      switch(copyOfItem.name){
         case MyDraggables.TABLE:
-          board[0] = (<TableDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} reloadParent={() => updateSquare()}/>)
+          board = (<TableDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} />)
           break
         case MyDraggables.ATTRIBUTE:
-          board[0] = (<AttributeDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} reloadParent={() => updateSquare()}/>)
+          board = (<AttributeDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} />)
           break
         case MyDraggables.RELATIONSHIP:
-          board[0] = (<RelationshipDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} reloadParent={() => updateSquare()}/>)
+          board = (<RelationshipDraggable name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} />)
           break
         default:
           break
       }
-    }
-  
-    function updateSquare(){
-      setNum(prevNum => prevNum+1)
     }
   
     const [{isOver}, drop] = useDrop(() => ({
@@ -54,12 +49,13 @@ export function GridSquare(props){
         }
         item.id = 0
         props.myFunc(copyOfItem, item.x, item.y)
+        
       }
     }
   
     return (
       <div className='square' style={props.style} ref={drop}>
-        {board[0]}
+        {board}
       </div>
     )
 }
