@@ -23,7 +23,7 @@ export function TableDraggable(props){
   }))
 
   if (isOver && canDrop){
-    getItem.id = props.id;
+    getItem.tableid = props.tableid;
   }
 
   const handleDrop = (item) => {
@@ -35,7 +35,7 @@ export function TableDraggable(props){
     item: { 
       eletype: props.eletype,
       name: props.name,
-      id: props.id, 
+      tableid: props.tableid, 
       x: props.x,
       y: props.y
     },
@@ -48,10 +48,10 @@ export function TableDraggable(props){
       width="150px"
       eletype={props.eletype}
       name={props.name}
-      id={props.eletype + "." + props.id}
+      id={props.eletype + "." + props.tableid}
       onClick={() => {
-        if (props.id !== 0){
-          let myInput = document.getElementById(props.eletype + "." + props.id).getElementsByClassName('internalText');
+        if (props.tableid !== 0){
+          let myInput = document.getElementById(props.eletype + "." + props.tableid).getElementsByClassName('internalText');
           myInput[0].focus()
         }
       }}
@@ -61,7 +61,7 @@ export function TableDraggable(props){
         type="text"
         value={value}
         onChange={(event) => {
-          if (props.id !== 0){
+          if (props.tableid !== 0){
             setValue(event.target.value)
           }
         }}
@@ -82,7 +82,8 @@ export function AttributeDraggable(props){
       item: { 
         eletype: props.eletype,
         name: props.name,
-        id: props.id, 
+        tableid: props.tableid, 
+        attrid: props.attrid,
         x: props.x,
         y: props.y
       },
@@ -95,10 +96,10 @@ export function AttributeDraggable(props){
         width="150px"
         eletype={props.eletype}
         name={props.name}
-        id={props.eletype + "." + props.id}
+        id={props.eletype + "." + props.attrid}
         onClick={() => {
-          if (props.id !== 0){
-            let myInput = document.getElementById(props.eletype + "." + props.id).getElementsByClassName('internalText');
+          if (props.attrid !== 0){
+            let myInput = document.getElementById(props.eletype + "." + props.attrid).getElementsByClassName('internalText');
             myInput[0].focus()
           }
         }}
@@ -108,7 +109,7 @@ export function AttributeDraggable(props){
           type="text"
           value={value}
           onChange={(event) => {
-            if (props.id !== 0){
+            if (props.tableid !== 0){
               setValue(event.target.value)
             }
           }}

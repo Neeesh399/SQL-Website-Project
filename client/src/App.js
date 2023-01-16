@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -12,7 +12,35 @@ import { GridSquare } from './components/GridSquare';
 
 function SQLGenerateButton(props){
   const handleClick = () => {
+    let returnArr = []
+    
+    let tables = []
+    let attributes = []
     console.log(props.allElements)
+    for (const [key,value] of Object.entries(props.allElements)){
+      if (value.eletype === "table"){
+        tables.push(value)
+      }
+      else if (value.eletype === "attribute"){
+        attributes.push(value)
+      }
+    }
+    returnArr.push(tables)
+    returnArr.push(attributes)
+
+    const requestOptions = {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(returnArr)
+    }
+    
+    fetch("/api", requestOptions).then(
+      response => response.json()
+    ).then(
+      data => {
+        console.log(data)
+      }
+    )
   }
 
   return (
@@ -40,9 +68,9 @@ function OptionsLeft(props){
   return (
     <div id='optionsLeft' ref={drop}>
       <SQLGenerateButton allElements={props.allElements} />
-      <TableDraggable eletype={MyDraggables.TABLE} name={MyDraggables.TABLE} id={0} x={-1} y={-1}/>
-      <AttributeDraggable eletype={MyDraggables.ATTRIBUTE} name={MyDraggables.ATTRIBUTE} id={0} x={-1} y={-1}/>
-      <RelationshipDraggable eletype={MyDraggables.RELATIONSHIP} name={MyDraggables.RELATIONSHIP} id={0} x={-1} y={-1}/>
+      <TableDraggable eletype={MyDraggables.TABLE} name={MyDraggables.TABLE} tableid={0} x={-1} y={-1}/>
+      <AttributeDraggable eletype={MyDraggables.ATTRIBUTE} name={MyDraggables.ATTRIBUTE} tableid={0} attrid={0} x={-1} y={-1}/>
+      <RelationshipDraggable eletype={MyDraggables.RELATIONSHIP} name={MyDraggables.RELATIONSHIP} tableid={0} x={-1} y={-1}/>
     </div>
   )
 }
@@ -65,7 +93,8 @@ class BodySection extends React.Component{
       plswork: plswork,
       history2: history2,
       numSteps: 0,
-      idNums: 0,
+      tableIdNums: 0,
+      attrIdNums: 0,
     };
   }
 
@@ -75,10 +104,15 @@ class BodySection extends React.Component{
     const currentGrid = Object.assign({}, current.currentGrid);
     let key = String(element.x) + "." + String(element.y);
     
-    let idNum = this.state.idNums;
-    if (element.eletype === "table" && element.id === 0){
-      idNum++;
-      element.id = idNum
+    let tableIdNum = this.state.tableIdNums;
+    let attrIdNum = this.state.attrIdNums;
+    if (element.eletype === "table" && element.tableid === 0){
+      tableIdNum++;
+      element.tableid = tableIdNum;
+    }
+    else if(element.eletype === "attribute" && element.attrid === 0){
+      attrIdNum++;
+      element.attrid = attrIdNum;
     }
 
     if (x !== -1){
@@ -102,7 +136,8 @@ class BodySection extends React.Component{
         }
       ]),
       numSteps: history2.length,
-      idNums: idNum,
+      tableIdNums: tableIdNum,
+      attrIdNums: attrIdNum,
     });
     //console.log(currentGrid)
   }
@@ -115,7 +150,7 @@ class BodySection extends React.Component{
 
    
     currentGrid[key].name = newName
-    console.log(currentGrid[key])
+    //console.log(currentGrid[key])
 
     this.setState({
       size: this.state.size,
@@ -126,7 +161,8 @@ class BodySection extends React.Component{
         }
       ]),
       numSteps: history2.length,
-      idNums: this.state.idNums,
+      tableIdNums: this.state.tableIdNums,
+      attrIdNums: this.state.attrIdNums,
     });
     //console.log(currentGrid)
   }
@@ -143,7 +179,7 @@ class BodySection extends React.Component{
     if (item.eletype === "table"){
       for (const [key,value] of Object.entries(currentGrid)){
         let currObject = currentGrid[key]
-        if (currObject.id === item.id){
+        if (currObject.tableid === item.tableid){
           delete currentGrid[key]
         }
       }
@@ -158,7 +194,8 @@ class BodySection extends React.Component{
         }
       ]),
       numSteps: history2.length,
-      idNums: this.state.idNums,
+      tableIdNums: this.state.tableIdNums,
+      attrIdNums: this.state.attrIdNums,
     });
   }
 
@@ -215,6 +252,20 @@ class BodySection extends React.Component{
 
 
 function App(){
+  /*
+  const [backendData, setBackendData] = useState([{}])
+
+  useEffect(() => {
+    fetch("/api").then(
+      response => response.json()
+    ).then(
+      data => {
+        setBackendData(data)
+      }
+    )
+  }, [])
+  */
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div id='root2' >

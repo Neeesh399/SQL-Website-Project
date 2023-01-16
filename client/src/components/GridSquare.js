@@ -13,13 +13,13 @@ export function GridSquare(props){
       let copyOfItem = props.board[key]
       switch(copyOfItem.eletype){
         case MyDraggables.TABLE:
-          board = (<TableDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
+          board = (<TableDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
           break
         case MyDraggables.ATTRIBUTE:
-          board = (<AttributeDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
+          board = (<AttributeDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} attrid={copyOfItem.attrid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
           break
         case MyDraggables.RELATIONSHIP:
-          board = (<RelationshipDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} id={copyOfItem.id} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
+          board = (<RelationshipDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
           break
         default:
           break
@@ -35,7 +35,7 @@ export function GridSquare(props){
     }))
   
     const handleDrop = (item) => {
-      if (item.eletype === "attribute" && item.id === 0){
+      if (item.eletype === "attribute" && item.tableid === 0){
         //Do nothing
       }
       else{
@@ -49,7 +49,7 @@ export function GridSquare(props){
           copyOfItem.eletype = tempElements[tempKey].eletype;
           copyOfItem.name = tempElements[tempKey].name;
         }
-        item.id = 0
+        item.tableid = 0
         props.myFunc(copyOfItem, item.x, item.y)
         
       }
