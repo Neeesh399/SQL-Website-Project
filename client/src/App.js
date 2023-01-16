@@ -10,6 +10,20 @@ import Topbar from './components/Nav'
 import { MyDraggables, RelationshipDraggable, TableDraggable, AttributeDraggable } from './components/Draggables';
 import { GridSquare } from './components/GridSquare';
 
+function SQLGenerateButton(props){
+  const handleClick = () => {
+    console.log(props.allElements)
+  }
+
+  return (
+    <div>
+      <button variant="contained" onClick={handleClick}>
+        SQLify
+      </button>
+    </div>
+  )
+}
+
 function OptionsLeft(props){
   const [{isOver}, drop] = useDrop(() => ({
     accept: [MyDraggables.TABLE, MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
@@ -25,9 +39,10 @@ function OptionsLeft(props){
 
   return (
     <div id='optionsLeft' ref={drop}>
-      <TableDraggable name={MyDraggables.TABLE} id={0} x={-1} y={-1}/>
-      <AttributeDraggable name={MyDraggables.ATTRIBUTE} id={0} x={-1} y={-1}/>
-      <RelationshipDraggable name={MyDraggables.RELATIONSHIP} id={0} x={-1} y={-1}/>
+      <SQLGenerateButton allElements={props.allElements} />
+      <TableDraggable eletype={MyDraggables.TABLE} name={MyDraggables.TABLE} id={0} x={-1} y={-1}/>
+      <AttributeDraggable eletype={MyDraggables.ATTRIBUTE} name={MyDraggables.ATTRIBUTE} id={0} x={-1} y={-1}/>
+      <RelationshipDraggable eletype={MyDraggables.RELATIONSHIP} name={MyDraggables.RELATIONSHIP} id={0} x={-1} y={-1}/>
     </div>
   )
 }
@@ -36,7 +51,6 @@ class BodySection extends React.Component{
   constructor(props){
     super(props);
     const size = 5;
-    //const gridArr = [];
     const plswork = {};
     const history2 = [
       {
@@ -44,25 +58,14 @@ class BodySection extends React.Component{
       }
     ]
     this.modGrid2 = this.modGrid2.bind(this)
+    this.updateElementValues = this.updateElementValues.bind(this)
 
     this.state = {
       size: size,
-      //gridArr: gridArr,
       plswork: plswork,
       history2: history2,
       numSteps: 0,
       idNums: 0,
-      starterDraggables: [
-        {
-          name: "table", id: 0, x: -1, y: -1,
-        },
-        {
-          name: "attribute", id: 0, x: -1, y: -1,
-        },
-        {
-          name: "relationship", id: 0, x: -1, y: -1,
-        },
-      ],
     };
   }
 
@@ -73,7 +76,7 @@ class BodySection extends React.Component{
     let key = String(element.x) + "." + String(element.y);
     
     let idNum = this.state.idNums;
-    if (element.name === "table" && element.id === 0){
+    if (element.eletype === "table" && element.id === 0){
       idNum++;
       element.id = idNum
     }
@@ -83,7 +86,7 @@ class BodySection extends React.Component{
       delete currentGrid[oldKey];
     }
     
-    if (element.name === "attribute" && currentGrid[key] != null && currentGrid[key].name === "table"){
+    if (element.eletype === "attribute" && currentGrid[key] != null && currentGrid[key].eletype === "table"){
       //Do Nothing
     }
     else{
@@ -92,7 +95,6 @@ class BodySection extends React.Component{
     
     this.setState({
       size: this.state.size,
-      //gridArr: this.state.gridArr,
       plswork: currentGrid,
       history2: history2.concat([
         {
@@ -101,9 +103,32 @@ class BodySection extends React.Component{
       ]),
       numSteps: history2.length,
       idNums: idNum,
-      starterDraggables: this.state.starterDraggables
     });
-    console.log(currentGrid)
+    //console.log(currentGrid)
+  }
+
+  updateElementValues(x,y,newName){
+    const history2 = this.state.history2.slice(0,this.state.numSteps+1);
+    const current = history2[history2.length-1]
+    const currentGrid = Object.assign({}, current.currentGrid);
+    let key = String(x) + "." + String(y);
+
+   
+    currentGrid[key].name = newName
+    console.log(currentGrid[key])
+
+    this.setState({
+      size: this.state.size,
+      plswork: currentGrid,
+      history2: history2.concat([
+        {
+          currentGrid: currentGrid
+        }
+      ]),
+      numSteps: history2.length,
+      idNums: this.state.idNums,
+    });
+    //console.log(currentGrid)
   }
 
   delFromGrid(item){
@@ -115,7 +140,7 @@ class BodySection extends React.Component{
       delete currentGrid[oldKey];
     }
 
-    if (item.name === "table"){
+    if (item.eletype === "table"){
       for (const [key,value] of Object.entries(currentGrid)){
         let currObject = currentGrid[key]
         if (currObject.id === item.id){
@@ -126,7 +151,6 @@ class BodySection extends React.Component{
 
     this.setState({
       size: this.state.size,
-      //gridArr: this.state.gridArr,
       plswork: currentGrid,
       history2: history2.concat([
         {
@@ -135,7 +159,6 @@ class BodySection extends React.Component{
       ]),
       numSteps: history2.length,
       idNums: this.state.idNums,
-      starterDraggables: this.state.starterDraggables
     });
   }
 
@@ -165,15 +188,19 @@ class BodySection extends React.Component{
             myFunc={this.modGrid2} 
             currElements={() => this.retrieveGrid()}
             board={this.state.plswork}
+            updateElement={this.updateElementValues}
           />
         )
       }
       gridArr.push(row)
     }
-
+  
     return (
       <div id='wrapper'>
-        <OptionsLeft starterDraggables={this.state.starterDraggables} delFromGrid={(x,y) => this.delFromGrid(x,y)}/>
+        <OptionsLeft 
+          delFromGrid={(x,y) => this.delFromGrid(x,y)} 
+          allElements={this.state.plswork}
+        />
         <div id='gridRight'>
           {
             gridArr.map((row, index) => (

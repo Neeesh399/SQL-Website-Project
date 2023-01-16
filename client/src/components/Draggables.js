@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import { useDrag } from 'react-dnd';
 import { useDrop } from 'react-dnd';
@@ -10,91 +10,110 @@ export const MyDraggables = {
 }
 
 export function TableDraggable(props){
-    const [{isOver, canDrop, getItem}, drop] = useDrop(() => ({
-        accept: [MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
-        drop: (item) => handleDrop(item),
-        collect: (monitor) => ({
-          isOver: !!monitor.isOver(),
-          canDrop: monitor.canDrop(),
-          getItem: monitor.getItem(),
-        })
-    }))
+  const [value, setValue] = useState(props.name)
 
-    if (isOver && canDrop){
-      getItem.id = props.id;
-    }
+  const [{isOver, canDrop, getItem}, drop] = useDrop(() => ({
+      accept: [MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
+      drop: (item) => handleDrop(item),
+      collect: (monitor) => ({
+        isOver: !!monitor.isOver(),
+        canDrop: monitor.canDrop(),
+        getItem: monitor.getItem(),
+      })
+  }))
 
-    const handleDrop = (item) => {
-        console.log("dropped!")
-        console.log(item)
-    }
+  if (isOver && canDrop){
+    getItem.id = props.id;
+  }
 
-    const [, drag] = useDrag(() => ({
-      type: MyDraggables.TABLE,
-      item: { 
-        name: props.name,
-        id: props.id, 
-        x: props.x,
-        y: props.y
-      },
-      /*end: (item, monitor) => {
-        if (props.x !== -1){
-          //props.reloadParent()
+  const handleDrop = (item) => {
+      //Do nothing on drop
+  }
+
+  const [, drag] = useDrag(() => ({
+    type: MyDraggables.TABLE,
+    item: { 
+      eletype: props.eletype,
+      name: props.name,
+      id: props.id, 
+      x: props.x,
+      y: props.y
+    },
+  }))
+
+  return (
+    <div 
+      className={props.eletype} 
+      ref={(el) => {drag(el); drop(el);}}
+      width="150px"
+      eletype={props.eletype}
+      name={props.name}
+      id={props.eletype + "." + props.id}
+      onClick={() => {
+        if (props.id !== 0){
+          let myInput = document.getElementById(props.eletype + "." + props.id).getElementsByClassName('internalText');
+          myInput[0].focus()
         }
-      }*/
-    }))
-
-    return (
-      <div 
-        className={props.name} 
-        ref={(el) => {drag(el); drop(el);}}
-        width="150px"
-        name={props.name}
-        id={props.id}
-      >
-        <input
-          className='internalText'
-          type="text"
-          value={props.name}
-          onChange={() => {
-            console.log("test")
-          }} 
-        />  
-      </div>
-      
-    )
+      }}
+    >
+      <input
+        className='internalText'
+        type="text"
+        value={value}
+        onChange={(event) => {
+          if (props.id !== 0){
+            setValue(event.target.value)
+          }
+        }}
+        onBlur={(event) => {
+          props.updateElement(props.x, props.y, value)
+        }} 
+      />  
+    </div>
+    
+  )
 }
 
 export function AttributeDraggable(props){
+  const [value, setValue] = useState(props.name)
+
     const [, drag] = useDrag(() => ({
       type: MyDraggables.ATTRIBUTE,
       item: { 
+        eletype: props.eletype,
         name: props.name,
         id: props.id, 
         x: props.x,
         y: props.y
       },
-      end: (item, monitor) => {
-        if (props.x !== -1){
-          props.reloadParent()
-        }
-      }
     }))
   
     return (
       <div 
-        className={props.name} 
+        className={props.eletype} 
         ref={drag}
         width="150px"
+        eletype={props.eletype}
         name={props.name}
-        id={props.id}
+        id={props.eletype + "." + props.id}
+        onClick={() => {
+          if (props.id !== 0){
+            let myInput = document.getElementById(props.eletype + "." + props.id).getElementsByClassName('internalText');
+            myInput[0].focus()
+          }
+        }}
       >
         <input
           className='internalText'
           type="text"
-          value={props.name}
-          onChange={() => {
-            console.log("test")
+          value={value}
+          onChange={(event) => {
+            if (props.id !== 0){
+              setValue(event.target.value)
+            }
+          }}
+          onBlur={(event) => {
+            props.updateElement(props.x, props.y, value)
           }} 
         />  
       </div>
@@ -106,32 +125,29 @@ export function RelationshipDraggable(props){
     const [, drag] = useDrag(() => ({
       type: MyDraggables.RELATIONSHIP,
       item: { 
+        eletype: props.eletype,
         name: props.name,
         id: props.id, 
         x: props.x,
         y: props.y
       },
-      end: (item, monitor) => {
-        if (props.x !== -1){
-          props.reloadParent()
-        }
-      }
     }))
   
     return (
       <div 
-        className={props.name} 
+        className={props.eletype} 
         ref={drag}
         width="150px"
+        eletype={props.eletype}
         name={props.name}
         id={props.id}
       >
         <input
           className='internalText'
           type="text"
-          value={props.name}
+          value={props.eletype}
           onChange={() => {
-            console.log("test")
+            //console.log("test")
           }} 
         />  
       </div>
