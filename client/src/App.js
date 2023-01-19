@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -11,8 +12,9 @@ import { MyDraggables, RelationshipDraggable, TableDraggable, AttributeDraggable
 import { GridSquare } from './components/GridSquare';
 
 function SQLGenerateButton(props){
-  const handleClick = () => {
-    let returnArr = []
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    let returnArr = {}
     
     let tables = []
     let attributes = []
@@ -25,29 +27,43 @@ function SQLGenerateButton(props){
         attributes.push(value)
       }
     }
-    returnArr.push(tables)
-    returnArr.push(attributes)
+    returnArr["tables"] = tables
+    returnArr["attributes"] = attributes
+    console.log(JSON.stringify(returnArr))
 
+    axios.post("/posts", {
+      myTest: "test"
+    }).then(response => {
+      console.log(response.data)
+    }).catch(err => {
+      console.log(err)
+    })
+    /*
     const requestOptions = {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(returnArr)
+      body: JSON.stringify("test")
     }
     
-    fetch("/api", requestOptions).then(
+    fetch("/posts", requestOptions).then(
       response => response.json()
     ).then(
       data => {
         console.log(data)
       }
-    )
+    )*/
   }
 
   return (
     <div>
-      <button variant="contained" onClick={handleClick}>
-        SQLify
-      </button>
+      <form
+        method="POST"
+        onSubmit={event => handleSubmit(event)}
+      >
+        <button variant="contained" type="submit"> SQLify </button>
+      </form>
+
+      
     </div>
   )
 }

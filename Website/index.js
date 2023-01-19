@@ -4,6 +4,10 @@ const express = require('express');
 
 const app = express();
 
+//Routers
+const postRouter = require('./routes/posts.js')
+app.use("/posts", postRouter)
+
 app.get('/api', (request, response) => {
 
     response.json({"test": ["a", "b", "c"]})
@@ -17,6 +21,7 @@ app.get('/api', (request, response) => {
     });
     */
 });
+
 
 app.listen(5000, () => {
     console.log("App available on http://localhost:5000/api");
