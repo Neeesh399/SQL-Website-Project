@@ -13,13 +13,13 @@ export function TableDraggable(props){
   const [value, setValue] = useState(props.name)
 
   const [{isOver, canDrop, getItem}, drop] = useDrop(() => ({
-      accept: [MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
-      drop: (item) => handleDrop(item),
-      collect: (monitor) => ({
-        isOver: !!monitor.isOver(),
-        canDrop: monitor.canDrop(),
-        getItem: monitor.getItem(),
-      })
+    accept: [MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
+    drop: (item) => handleDrop(item),
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+      canDrop: monitor.canDrop(),
+      getItem: monitor.getItem(),
+    })
   }))
 
   if (isOver && canDrop){
@@ -36,6 +36,7 @@ export function TableDraggable(props){
       eletype: props.eletype,
       name: props.name,
       tableid: props.tableid, 
+      options: props.options,
       x: props.x,
       y: props.y
     },
@@ -66,8 +67,13 @@ export function TableDraggable(props){
           }
         }}
         onBlur={(event) => {
-          props.updateElement(props.x, props.y, value)
-        }} 
+          let options = props.options
+          options["name"] = value
+          props.updateElement(options)
+        }}
+        onFocus={(event) => {
+          props.setFocusElementKey(props.x,props.y)
+        }}
       />  
     </div>
     
@@ -84,6 +90,7 @@ export function AttributeDraggable(props){
         name: props.name,
         tableid: props.tableid, 
         attrid: props.attrid,
+        options: props.options,
         x: props.x,
         y: props.y
       },
@@ -114,8 +121,14 @@ export function AttributeDraggable(props){
             }
           }}
           onBlur={(event) => {
-            props.updateElement(props.x, props.y, value)
+            let options = props.options
+            options["name"] = value
+            options["test"] = "mytest"
+            props.updateElement(options)
           }} 
+          onFocus={(event) => {
+            props.setFocusElementKey(props.x,props.y)
+          }}
         />  
       </div>
       

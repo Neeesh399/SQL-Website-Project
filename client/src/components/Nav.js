@@ -16,14 +16,7 @@ class Topbar extends React.Component{
     render() {
         return (
         <div id="topbar">
-            <div className='bannerLeft'></div>
-            <div className='bannerMiddle'>
-            <h1>Serve.</h1>
-            </div>
-            <div className='bannerRight'>
-            <LoginButton />
-            <SignUpButton />
-            </div>
+            <h1 class="websiteTitle">Serve.</h1>
         </div>
         );
     }

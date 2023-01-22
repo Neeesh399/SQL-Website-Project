@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import React from 'react'
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -10,66 +9,12 @@ import './App.css'
 import Topbar from './components/Nav'
 import { MyDraggables, RelationshipDraggable, TableDraggable, AttributeDraggable } from './components/Draggables';
 import { GridSquare } from './components/GridSquare';
+import { SQLGenerateButton } from './components/SQLButton';
+import { AttributeElementOptions } from './components/ElementOptions'
 
-function SQLGenerateButton(props){
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    let returnArr = {}
-    
-    let tables = []
-    let attributes = []
-    console.log(props.allElements)
-    for (const [key,value] of Object.entries(props.allElements)){
-      if (value.eletype === "table"){
-        tables.push(value)
-      }
-      else if (value.eletype === "attribute"){
-        attributes.push(value)
-      }
-    }
-    returnArr["tables"] = tables
-    returnArr["attributes"] = attributes
-    console.log(JSON.stringify(returnArr))
 
-    axios.post("/posts", {
-      myTest: "test"
-    }).then(response => {
-      console.log(response.data)
-    }).catch(err => {
-      console.log(err)
-    })
-    /*
-    const requestOptions = {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify("test")
-    }
-    
-    fetch("/posts", requestOptions).then(
-      response => response.json()
-    ).then(
-      data => {
-        console.log(data)
-      }
-    )*/
-  }
-
-  return (
-    <div>
-      <form
-        method="POST"
-        onSubmit={event => handleSubmit(event)}
-      >
-        <button variant="contained" type="submit"> SQLify </button>
-      </form>
-
-      
-    </div>
-  )
-}
-
-function OptionsLeft(props){
-  const [{isOver}, drop] = useDrop(() => ({
+function OptionsRight(props){
+  const [, drop] = useDrop(() => ({
     accept: [MyDraggables.TABLE, MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
     drop: (item) => handleDrop(item),
     collect: (monitor) => ({
@@ -82,10 +27,10 @@ function OptionsLeft(props){
   }
 
   return (
-    <div id='optionsLeft' ref={drop}>
+    <div id='elementcontainer' ref={drop}>
       <SQLGenerateButton allElements={props.allElements} />
-      <TableDraggable eletype={MyDraggables.TABLE} name={MyDraggables.TABLE} tableid={0} x={-1} y={-1}/>
-      <AttributeDraggable eletype={MyDraggables.ATTRIBUTE} name={MyDraggables.ATTRIBUTE} tableid={0} attrid={0} x={-1} y={-1}/>
+      <TableDraggable eletype={MyDraggables.TABLE} name={MyDraggables.TABLE} tableid={0} x={-1} y={-1} options={{}}/>
+      <AttributeDraggable eletype={MyDraggables.ATTRIBUTE} name={MyDraggables.ATTRIBUTE} tableid={0} attrid={0} x={-1} y={-1} options = {{}}/>
       <RelationshipDraggable eletype={MyDraggables.RELATIONSHIP} name={MyDraggables.RELATIONSHIP} tableid={0} x={-1} y={-1}/>
     </div>
   )
@@ -94,7 +39,7 @@ function OptionsLeft(props){
 class BodySection extends React.Component{
   constructor(props){
     super(props);
-    const size = 5;
+    const size = 6;
     const plswork = {};
     const history2 = [
       {
@@ -103,6 +48,7 @@ class BodySection extends React.Component{
     ]
     this.modGrid2 = this.modGrid2.bind(this)
     this.updateElementValues = this.updateElementValues.bind(this)
+    this.setFocusElementKey = this.setFocusElementKey.bind(this)
 
     this.state = {
       size: size,
@@ -111,6 +57,7 @@ class BodySection extends React.Component{
       numSteps: 0,
       tableIdNums: 0,
       attrIdNums: 0,
+      focusElementKey: null,
     };
   }
 
@@ -154,18 +101,19 @@ class BodySection extends React.Component{
       numSteps: history2.length,
       tableIdNums: tableIdNum,
       attrIdNums: attrIdNum,
+      focusElementKey: key,
     });
     //console.log(currentGrid)
   }
 
-  updateElementValues(x,y,newName){
+  updateElementValues(options){
     const history2 = this.state.history2.slice(0,this.state.numSteps+1);
     const current = history2[history2.length-1]
     const currentGrid = Object.assign({}, current.currentGrid);
-    let key = String(x) + "." + String(y);
+    let key = this.state.focusElementKey
 
-   
-    currentGrid[key].name = newName
+    currentGrid[key].name = options.name
+    currentGrid[key].options = options
     //console.log(currentGrid[key])
 
     this.setState({
@@ -179,6 +127,7 @@ class BodySection extends React.Component{
       numSteps: history2.length,
       tableIdNums: this.state.tableIdNums,
       attrIdNums: this.state.attrIdNums,
+      focusElementKey: key
     });
     //console.log(currentGrid)
   }
@@ -193,7 +142,7 @@ class BodySection extends React.Component{
     }
 
     if (item.eletype === "table"){
-      for (const [key,value] of Object.entries(currentGrid)){
+      for (const [key,] of Object.entries(currentGrid)){
         let currObject = currentGrid[key]
         if (currObject.tableid === item.tableid){
           delete currentGrid[key]
@@ -212,7 +161,24 @@ class BodySection extends React.Component{
       numSteps: history2.length,
       tableIdNums: this.state.tableIdNums,
       attrIdNums: this.state.attrIdNums,
+      focusElementKey: null,
     });
+  }
+
+  setFocusElementKey(x,y){
+    if (x !== -1){
+      let key = String(x) + "." + String(y);
+      
+      this.setState({
+        size: this.state.size,
+        plswork: this.state.plswork,
+        history2: this.state.history2,
+        numSteps: this.state.numSteps,
+        tableIdNums: this.state.tableIdNums,
+        attrIdNums: this.state.attrIdNums,
+        focusElementKey: key,
+      });
+    }
   }
 
   retrieveGrid(){
@@ -223,8 +189,8 @@ class BodySection extends React.Component{
   render (){   
     let gridArr = []
     let maxWidth = 100/this.state.size;
-    let maxHeight = 90/this.state.size;
-    
+    let maxHeight = 100/this.state.size;
+
     let myStyling = {
       width: maxWidth+"vw",
       height: maxHeight+"vh"
@@ -242,6 +208,7 @@ class BodySection extends React.Component{
             currElements={() => this.retrieveGrid()}
             board={this.state.plswork}
             updateElement={this.updateElementValues}
+            setFocusElementKey={this.setFocusElementKey}
           />
         )
       }
@@ -250,17 +217,22 @@ class BodySection extends React.Component{
   
     return (
       <div id='wrapper'>
-        <OptionsLeft 
-          delFromGrid={(x,y) => this.delFromGrid(x,y)} 
-          allElements={this.state.plswork}
-        />
-        <div id='gridRight'>
+        <div id='gridLeft'>
           {
             gridArr.map((row, index) => (
               <div className='row' key={index}>{row}</div>
             ))
           }
         </div>
+        <div id='optionsRight'> 
+          <Topbar />
+          <OptionsRight 
+            delFromGrid={(x,y) => this.delFromGrid(x,y)} 
+            allElements={this.state.plswork}
+          />
+          <AttributeElementOptions currGrid={this.state.plswork} currFocus={this.state.focusElementKey} updateElement={this.updateElementValues} />
+        </div>
+      
       </div>
     )
   };
@@ -268,24 +240,10 @@ class BodySection extends React.Component{
 
 
 function App(){
-  /*
-  const [backendData, setBackendData] = useState([{}])
-
-  useEffect(() => {
-    fetch("/api").then(
-      response => response.json()
-    ).then(
-      data => {
-        setBackendData(data)
-      }
-    )
-  }, [])
-  */
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div id='root2' >
-        <Topbar />
         <BodySection />
 
       </div>

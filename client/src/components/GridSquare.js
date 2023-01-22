@@ -13,10 +13,10 @@ export function GridSquare(props){
       let copyOfItem = props.board[key]
       switch(copyOfItem.eletype){
         case MyDraggables.TABLE:
-          board = (<TableDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
+          board = (<TableDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement} options={copyOfItem.options} setFocusElementKey={props.setFocusElementKey}/>)
           break
         case MyDraggables.ATTRIBUTE:
-          board = (<AttributeDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} attrid={copyOfItem.attrid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
+          board = (<AttributeDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} attrid={copyOfItem.attrid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement} options={copyOfItem.options} setFocusElementKey={props.setFocusElementKey}/>)
           break
         case MyDraggables.RELATIONSHIP:
           board = (<RelationshipDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement}/>)
@@ -26,7 +26,7 @@ export function GridSquare(props){
       }
     }
   
-    const [{isOver}, drop] = useDrop(() => ({
+    const [, drop] = useDrop(() => ({
       accept: [MyDraggables.TABLE, MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
       drop: (item) => handleDrop(item),
       collect: (monitor) => ({
@@ -45,6 +45,7 @@ export function GridSquare(props){
         copyOfItem.x = props.x;
         copyOfItem.y = props.y;
         copyOfItem.name = item.name;
+        copyOfItem.options = item.options
         if (tempElements[tempKey] !== undefined){
           copyOfItem.eletype = tempElements[tempKey].eletype;
           copyOfItem.name = tempElements[tempKey].name;
