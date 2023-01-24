@@ -16,7 +16,7 @@ class Topbar extends React.Component{
     render() {
         return (
         <div id="topbar">
-            <h1 class="websiteTitle">Serve.</h1>
+            <h1 className="websiteTitle">Serve.</h1>
         </div>
         );
     }

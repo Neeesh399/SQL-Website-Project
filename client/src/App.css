@@ -1,9 +1,11 @@
+body{
+    background-color: rgb(34, 33, 37);
+}
 #topbar {
-    background-color: rgb(54, 52, 58);
     width: 100%;
     align-items: center;
     text-align: center;
-    height:10vh;
+    height:20vh;
 }
 #loginButton {
     justify-content: center;
@@ -29,7 +31,7 @@
     flex-direction: row;
 }
 #optionsRight{
-    width: 40%;
+    width: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -40,17 +42,34 @@
     align-items:center
 }
 #gridLeft{
-    width: 60%;
-    
+    width: 50%;
+    padding-left: 2.5vw;
+    padding-right: 2.5vw;
+    padding-top: 2.5vh;
+    padding-bottom: 2.5vh;
 }
 .square{
-    border-color: black;
-    border-style: solid;
-    border-width: 1px;
     display:flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
 }
+.square:hover{
+    background-color: rgba(253, 193, 43, 0.679);
+}
+.squareLeftWall{
+    border-left: rgb(63, 63, 63) solid 2px;
+}
+.squareRightWall{
+    border-right: rgb(63, 63, 63) solid 2px;
+}
+.squareTopWall{
+    border-top: rgb(63, 63, 63) solid 2px;
+}
+.squareBottomWall{
+    border-bottom: rgb(63, 63, 63) solid 2px;
+}
+
 .row{
     display: flex;
     flex-direction: row;
@@ -83,4 +102,13 @@
     border: none;
     background-color: inherit;
     width: inherit;
+}
+.mySVG{
+    position: absolute;
+    border: 1px solid red;
+    z-index: -1;
+}
+.SVGLine{
+    stroke:rgb(255,255,0);
+    stroke-width:2;
 }

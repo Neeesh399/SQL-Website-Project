@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { useDrag } from 'react-dnd';
 import { useDrop } from 'react-dnd';
@@ -10,8 +10,6 @@ export const MyDraggables = {
 }
 
 export function TableDraggable(props){
-  const [value, setValue] = useState(props.name)
-
   const [{isOver, canDrop, getItem}, drop] = useDrop(() => ({
     accept: [MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
     drop: (item) => handleDrop(item),
@@ -30,7 +28,7 @@ export function TableDraggable(props){
       //Do nothing on drop
   }
 
-  const [, drag] = useDrag(() => ({
+  const [{isDragging}, drag] = useDrag(() => ({
     type: MyDraggables.TABLE,
     item: { 
       eletype: props.eletype,
@@ -40,7 +38,18 @@ export function TableDraggable(props){
       x: props.x,
       y: props.y
     },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging()
+    })
   }))
+
+  /*if (props.x !== -1 && isDragging){
+    let myItem = document.getElementById(props.eletype + "." + props.tableid);
+    let options = props.options
+    options["pixelX"] = myItem.getBoundingClientRect().x
+    options["pixelY"] = myItem.getBoundingClientRect().y
+    props.updateElement(options)
+  }*/
 
   return (
     <div 
@@ -49,40 +58,25 @@ export function TableDraggable(props){
       width="150px"
       eletype={props.eletype}
       name={props.name}
+      options={props.options}
       id={props.eletype + "." + props.tableid}
       onClick={() => {
+        props.setFocusElementKey(props.x,props.y)
         if (props.tableid !== 0){
-          let myInput = document.getElementById(props.eletype + "." + props.tableid).getElementsByClassName('internalText');
-          myInput[0].focus()
+          let myInput = document.getElementById(props.eletype + "." + props.tableid);
+          console.log(myInput.getBoundingClientRect())
         }
       }}
     >
-      <input
-        className='internalText'
-        type="text"
-        value={value}
-        onChange={(event) => {
-          if (props.tableid !== 0){
-            setValue(event.target.value)
-          }
-        }}
-        onBlur={(event) => {
-          let options = props.options
-          options["name"] = value
-          props.updateElement(options)
-        }}
-        onFocus={(event) => {
-          props.setFocusElementKey(props.x,props.y)
-        }}
-      />  
+      <p className='internalText'>
+        {props.name}
+      </p>  
     </div>
     
   )
 }
 
 export function AttributeDraggable(props){
-  const [value, setValue] = useState(props.name)
-
     const [, drag] = useDrag(() => ({
       type: MyDraggables.ATTRIBUTE,
       item: { 
@@ -103,33 +97,14 @@ export function AttributeDraggable(props){
         width="150px"
         eletype={props.eletype}
         name={props.name}
-        id={props.eletype + "." + props.attrid}
+        id={props.eletype + "." + props.tableid + "." + props.attrid}
         onClick={() => {
-          if (props.attrid !== 0){
-            let myInput = document.getElementById(props.eletype + "." + props.attrid).getElementsByClassName('internalText');
-            myInput[0].focus()
-          }
+          props.setFocusElementKey(props.x,props.y)
         }}
       >
-        <input
-          className='internalText'
-          type="text"
-          value={value}
-          onChange={(event) => {
-            if (props.tableid !== 0){
-              setValue(event.target.value)
-            }
-          }}
-          onBlur={(event) => {
-            let options = props.options
-            options["name"] = value
-            options["test"] = "mytest"
-            props.updateElement(options)
-          }} 
-          onFocus={(event) => {
-            props.setFocusElementKey(props.x,props.y)
-          }}
-        />  
+        <p className='internalText'>
+          {props.name}
+        </p>  
       </div>
       
     )

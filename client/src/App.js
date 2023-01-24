@@ -27,6 +27,31 @@ function OptionsRight(props){
   }
 
   return (
+    <div id='optionsRight' ref={drop}> 
+      <Topbar />
+      <ElementContainer 
+        delFromGrid={props.delFromGrid} 
+        allElements={props.allElements}
+      />
+      <AttributeElementOptions currGrid={props.allElements} currFocus={props.focusElementKey} updateElementValues={props.updateElementValues} />
+    </div>
+  )
+}
+
+function ElementContainer(props){
+  const [, drop] = useDrop(() => ({
+    accept: [MyDraggables.TABLE, MyDraggables.ATTRIBUTE, MyDraggables.RELATIONSHIP],
+    drop: (item) => handleDrop(item),
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    })
+  }))
+  
+  const handleDrop = (item) => {
+    props.delFromGrid(item)
+  }
+
+  return (
     <div id='elementcontainer' ref={drop}>
       <SQLGenerateButton allElements={props.allElements} />
       <TableDraggable eletype={MyDraggables.TABLE} name={MyDraggables.TABLE} tableid={0} x={-1} y={-1} options={{}}/>
@@ -39,7 +64,7 @@ function OptionsRight(props){
 class BodySection extends React.Component{
   constructor(props){
     super(props);
-    const size = 6;
+    const size = 8;
     const plswork = {};
     const history2 = [
       {
@@ -49,6 +74,7 @@ class BodySection extends React.Component{
     this.modGrid2 = this.modGrid2.bind(this)
     this.updateElementValues = this.updateElementValues.bind(this)
     this.setFocusElementKey = this.setFocusElementKey.bind(this)
+    this.delFromGrid = this.delFromGrid.bind(this)
 
     this.state = {
       size: size,
@@ -103,7 +129,7 @@ class BodySection extends React.Component{
       attrIdNums: attrIdNum,
       focusElementKey: key,
     });
-    //console.log(currentGrid)
+    console.log(currentGrid)
   }
 
   updateElementValues(options){
@@ -114,7 +140,6 @@ class BodySection extends React.Component{
 
     currentGrid[key].name = options.name
     currentGrid[key].options = options
-    //console.log(currentGrid[key])
 
     this.setState({
       size: this.state.size,
@@ -168,7 +193,7 @@ class BodySection extends React.Component{
   setFocusElementKey(x,y){
     if (x !== -1){
       let key = String(x) + "." + String(y);
-      
+
       this.setState({
         size: this.state.size,
         plswork: this.state.plswork,
@@ -178,6 +203,8 @@ class BodySection extends React.Component{
         attrIdNums: this.state.attrIdNums,
         focusElementKey: key,
       });
+
+      document.getElementById("currFocusInput").focus()
     }
   }
 
@@ -188,8 +215,8 @@ class BodySection extends React.Component{
 
   render (){   
     let gridArr = []
-    let maxWidth = 100/this.state.size;
-    let maxHeight = 100/this.state.size;
+    let maxWidth = 95/this.state.size;
+    let maxHeight = 95/this.state.size;
 
     let myStyling = {
       width: maxWidth+"vw",
@@ -203,9 +230,9 @@ class BodySection extends React.Component{
           <GridSquare 
             x={x} 
             y={y} 
+            size={this.state.size}
             style={myStyling} 
             myFunc={this.modGrid2} 
-            currElements={() => this.retrieveGrid()}
             board={this.state.plswork}
             updateElement={this.updateElementValues}
             setFocusElementKey={this.setFocusElementKey}
@@ -224,20 +251,30 @@ class BodySection extends React.Component{
             ))
           }
         </div>
-        <div id='optionsRight'> 
-          <Topbar />
-          <OptionsRight 
-            delFromGrid={(x,y) => this.delFromGrid(x,y)} 
-            allElements={this.state.plswork}
-          />
-          <AttributeElementOptions currGrid={this.state.plswork} currFocus={this.state.focusElementKey} updateElement={this.updateElementValues} />
-        </div>
-      
+        <OptionsRight 
+          delFromGrid={this.delFromGrid} 
+          allElements={this.state.plswork}
+          focusElementKey={this.state.focusElementKey}
+          updateElementValues={this.updateElementValues}
+        />
+        <SVGHelper />
       </div>
     )
   };
 }
 
+function SVGHelper(props){
+  let allTables = document.getElementsByClassName("table")
+  let allAttributes = document.getElementsByClassName("attribute")
+
+  console.log(allTables)
+  console.log(allAttributes)
+  return (
+    <svg width='60%' height='100%' className='mySVG'>
+      <line x1="0" y1="0" x2="200" y2="200" className='SVGLine' />
+    </svg>
+  )
+}
 
 function App(){
 
@@ -245,7 +282,6 @@ function App(){
     <DndProvider backend={HTML5Backend}>
       <div id='root2' >
         <BodySection />
-
       </div>
     </DndProvider>
   )
