@@ -4,19 +4,6 @@ import { useDrop } from 'react-dnd';
 
 import { MyDraggables, RelationshipDraggable, TableDraggable, AttributeDraggable } from './Draggables';
 
-function SVGHelper(props){
-  let tableObj = document.getElementById(props.table.eletype + "." + props.table.tableid)
-  let otherObj = document.getElementsByClassName("attribute")
-  
-  console.log(tableObj)
-  console.log(otherObj)
-  return (
-    <svg width='100' height='100' className='mySVG'>
-
-    </svg>
-  )
-}
-
 export function GridSquare(props){
   let board = null
   let relationships = []
@@ -27,7 +14,7 @@ export function GridSquare(props){
     let copyOfItem = props.board[key]
     switch(copyOfItem.eletype){
       case MyDraggables.TABLE:
-        board = (<TableDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement} options={copyOfItem.options} setFocusElementKey={props.setFocusElementKey}/>)
+        board = (<TableDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement} options={copyOfItem.options} setFocusElementKey={props.setFocusElementKey} board={props.board}/>)
         break
       case MyDraggables.ATTRIBUTE:
         board = (<AttributeDraggable eletype={copyOfItem.eletype} name={copyOfItem.name} tableid={copyOfItem.tableid} attrid={copyOfItem.attrid} x={copyOfItem.x} y={copyOfItem.y} updateElement={props.updateElement} options={copyOfItem.options} setFocusElementKey={props.setFocusElementKey}/>)
@@ -104,11 +91,6 @@ export function GridSquare(props){
   return (
     <div className={extraClass} style={style} ref={drop}>
       {board}
-      {
-        relationships.map((element, index) => {
-          //return <SVGHelper table={props.board[key]} attr={element} key={index}/>  
-        })
-      }
     </div>
   )
 }

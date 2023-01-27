@@ -28,11 +28,19 @@ export function TableDraggable(props){
       //Do nothing on drop
   }
 
-  const [{isDragging}, drag] = useDrag(() => ({
+  
+  let tempName = props.name;
+  /*let key = String(props.x) + "." + String(props.y); 
+  if (props.x !== -1 && props.board[key] !== undefined){
+    tempName = props.board[key].name
+    console.log(tempName)
+  }*/
+
+  const [, drag] = useDrag(() => ({
     type: MyDraggables.TABLE,
     item: { 
       eletype: props.eletype,
-      name: props.name,
+      name: tempName,
       tableid: props.tableid, 
       options: props.options,
       x: props.x,
@@ -60,12 +68,9 @@ export function TableDraggable(props){
       name={props.name}
       options={props.options}
       id={props.eletype + "." + props.tableid}
+      tableid={props.tableid}
       onClick={() => {
         props.setFocusElementKey(props.x,props.y)
-        if (props.tableid !== 0){
-          let myInput = document.getElementById(props.eletype + "." + props.tableid);
-          console.log(myInput.getBoundingClientRect())
-        }
       }}
     >
       <p className='internalText'>
@@ -98,6 +103,7 @@ export function AttributeDraggable(props){
         eletype={props.eletype}
         name={props.name}
         id={props.eletype + "." + props.tableid + "." + props.attrid}
+        tableid={props.tableid}
         onClick={() => {
           props.setFocusElementKey(props.x,props.y)
         }}

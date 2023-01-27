@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -92,7 +92,7 @@ class BodySection extends React.Component{
     const current = history2[history2.length-1]
     const currentGrid = Object.assign({}, current.currentGrid);
     let key = String(element.x) + "." + String(element.y);
-    
+
     let tableIdNum = this.state.tableIdNums;
     let attrIdNum = this.state.attrIdNums;
     if (element.eletype === "table" && element.tableid === 0){
@@ -154,7 +154,7 @@ class BodySection extends React.Component{
       attrIdNums: this.state.attrIdNums,
       focusElementKey: key
     });
-    //console.log(currentGrid)
+    console.log(currentGrid)
   }
 
   delFromGrid(item){
@@ -208,11 +208,6 @@ class BodySection extends React.Component{
     }
   }
 
-  retrieveGrid(){
-    const history2 = this.state.history2.slice(0,this.state.numSteps+1);
-    return (history2[history2.length-1]).currentGrid
-  }
-
   render (){   
     let gridArr = []
     let maxWidth = 95/this.state.size;
@@ -244,7 +239,7 @@ class BodySection extends React.Component{
   
     return (
       <div id='wrapper'>
-        <div id='gridLeft'>
+        <div id='gridLeft' onWheel={(event) => {console.log(event.deltaY)}}>
           {
             gridArr.map((row, index) => (
               <div className='row' key={index}>{row}</div>
@@ -257,21 +252,94 @@ class BodySection extends React.Component{
           focusElementKey={this.state.focusElementKey}
           updateElementValues={this.updateElementValues}
         />
-        <SVGHelper />
+        <SVGHelper allElements={this.state.plswork} size={this.state.size}/>
       </div>
     )
   };
 }
 
 function SVGHelper(props){
-  let allTables = document.getElementsByClassName("table")
-  let allAttributes = document.getElementsByClassName("attribute")
+  const [val, setVal] = useState(0)
 
-  console.log(allTables)
-  console.log(allAttributes)
+  function debounce(func, time){
+    let timer 
+    return A => {
+      clearTimeout(timer)
+      timer = setTimeout(A => {
+        timer = null
+        func.apply(this, arguments)  
+      }, time);
+    }
+  }
+
+  useEffect(() => {
+    let debouncedHandleResize = debounce(function handleResize(){
+      setVal(val+1)
+    }, 100)
+
+    window.addEventListener('resize', debouncedHandleResize)
+
+    return _ => {
+      window.removeEventListener('resize', debouncedHandleResize)
+    }
+  })
+  
+  const returnArr = []
+  let squareWidth = (document.documentElement.clientWidth*.5)/props.size
+  let squareHeight = (document.documentElement.clientHeight)/props.size
+
+  let allTables = []
+  let allAttributes = []
+  let relationships = {}
+
+  for (const [,value] of Object.entries(props.allElements)){
+    if (value.eletype === "table"){
+      allTables.push(value)
+    }
+    else if (value.eletype === "attribute"){
+      allAttributes.push(value)
+    }
+  }
+
+  for (let i=0; i<allTables.length; i++){
+    let tableRelations = []
+    if (allTables[i].tableid === "0"){
+      continue;
+    } 
+    
+    let table = allTables[i]
+    for (let j=0; j<allAttributes.length; j++){
+      let attr = allAttributes[j]
+      if (attr.tableid === table.tableid){
+        tableRelations.push(attr.x + "." + attr.y)
+      }
+      //allAttributes.splice(j,1)
+    }
+    relationships[table.x + "." +table.y] = tableRelations
+    //allTables.splice(i,1)
+  }
+  
+  for (const [key,value] of Object.entries(relationships)){
+    for (let i=0; i<value.length; i++){
+      returnArr.push([key, value[i]])
+    }
+  }
+
   return (
     <svg width='60%' height='100%' className='mySVG'>
-      <line x1="0" y1="0" x2="200" y2="200" className='SVGLine' />
+      {
+        returnArr.map((value, index) => {
+          let x1 = parseInt(value[0].split('.')[0])
+          let y1 = parseInt(value[0].split('.')[1])
+          let x2 = parseInt(value[1].split('.')[0])
+          let y2 = parseInt(value[1].split('.')[1])
+
+          //console.log (squareWidth + " -- " + squareHeight)
+          //console.log(x1*squareWidth + " " + y1*squareHeight)
+
+          return <line key={index} x1={(document.documentElement.clientWidth*.025)+(x1*squareWidth)+(squareWidth/2)} y1={(document.documentElement.clientHeight*.025)+(y1*squareHeight)+(squareHeight/3)} x2={+(document.documentElement.clientWidth*.025)+(x2*squareWidth)+(squareWidth/2)} y2={(document.documentElement.clientHeight*.025)+(y2*squareHeight)+(squareHeight/3)} className='SVGLine'/>
+        })
+      }
     </svg>
   )
 }
@@ -282,6 +350,7 @@ function App(){
     <DndProvider backend={HTML5Backend}>
       <div id='root2' >
         <BodySection />
+        
       </div>
     </DndProvider>
   )
